@@ -1,0 +1,13 @@
+{
+  "name": "line-registration-lp",
+  "version": "1.0.0",
+  "description": "LINE登録ランディングページ",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "build": "echo 'No build process needed for static site'"
+  },
+  "keywords": ["landing-page", "line", "marketing"],
+  "author": "",
+  "license": "MIT"
+} 

@@ -1,0 +1,125 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    background-color: #f5f5f5;
+}
+
+.container {
+    position: relative;
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: white;
+}
+
+.lp-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* LINE登録ボタンの共通スタイル */
+.line-button {
+    position: absolute;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-50%);
+}
+.line-button:hover {
+    transform: translateX(-50%) scale(1.02);
+    background: rgba(0, 195, 0, 0.1);
+    border-radius: 25px;
+}
+
+.line-button:active {
+    transform: translateX(-50%) scale(0.98);
+    background: rgba(0, 195, 0, 0.2);
+    border-radius: 25px;
+}
+
+/* デバッグ用（必要に応じてコメントアウト）
+.line-button {
+    border: 2px dashed rgba(255, 0, 0, 0.5) !important;
+}
+*/
+
+.button-text {
+    color: transparent;
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    pointer-events: none;
+}
+
+/* 各ボタンの個別配置 */
+/* 1つ目のボタン（上部） */
+.line-button-1 {
+    top: 18%;
+    left: 50%;
+    width: 500px;
+    height: 100px;
+}
+
+/* 2つ目のボタン（中部） */
+.line-button-2 {
+    top: 39.5%;
+    left: 50%;
+    width: 500px;
+    height: 100px;
+}
+
+/* 3つ目のボタン（下部1） */
+.line-button-3 {
+    top: 76.4%;
+    left: 50%;
+    width: 500px;
+    height: 100px;
+}
+
+/* 4つ目のボタン（最下部） */
+.line-button-4 {
+    top: 96.8%;
+    left: 50%;
+    width: 500px;
+    height: 100px;
+}
+
+/* スマートフォン対応 */
+@media (max-width: 768px) {
+    .line-button {
+        width: 400px;
+        height: 80px;
+    }
+    
+    .button-text {
+        font-size: 14px;
+    }
+}
+
+/* クリック可能エリアを視覚的に示すためのホバー効果 */
+.line-button::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 25px;
+    background: rgba(0, 195, 0, 0.05);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.line-button:hover::before {
+    opacity: 1;
+} 
