@@ -12,17 +12,14 @@ function registerLine() {
         }, 150);
     }
     
-    // アラートで確認（実際の運用時は削除）
-    if (confirm('LINE公式アカウントに登録しますか？')) {
-        // 新しいタブでLINEを開く
-        window.open(lineUrl, '_blank');
-        
-        // Google Analyticsなどのトラッキングイベントを送信する場合
-        // gtag('event', 'click', {
-        //     'event_category': 'LINE',
-        //     'event_label': 'registration_button'
-        // });
-    }
+    // 直接LINEに遷移
+    window.open(lineUrl, '_blank');
+    
+    // Google Analyticsなどのトラッキングイベントを送信する場合
+    // gtag('event', 'click', {
+    //     'event_category': 'LINE',
+    //     'event_label': 'registration_button'
+    // });
 }
 
 // ページ読み込み時の処理
