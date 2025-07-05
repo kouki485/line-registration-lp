@@ -1,7 +1,7 @@
 // LINE登録ボタンがクリックされたときの処理
 function registerLine() {
     // LINE友だち追加URL
-    const lineUrl = 'https://line.me/R/ti/p/@124eljoy?oat_content=url&ts=06281539#~';
+    const lineUrl = 'https://lin.ee/MwRdDOk';
     
     // クリック時のアニメーション効果
     const clickedButton = event.target.closest('.line-button');
