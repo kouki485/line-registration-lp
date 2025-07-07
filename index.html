@@ -32,26 +32,28 @@
     <script type='text/javascript' src='https://ideaofficial.link-lc.com/adoptin/js/1/access.js'></script>
     <script>
         const params = new URLSearchParams(window.location.search);
-        const code = params.get("AD_CODE");
+        const adCode = params.get("AD_CODE") || "";
+        const euid = params.get("euid") || "###uid###"; // 配信時にLINEツールが置換する
       
-        // 対象の広告コード一覧（001-00001 〜 001-00020）
-        const validCodes = Array.from({length: 20}, (_, i) => {
-          return "0001-" + String(i + 2).padStart(5, '0');
+        // 分岐対象のAD_CODE一覧（0001-00002 ～ 0001-00021）
+        const validCodes = Array.from({ length: 20 }, (_, i) => {
+          return "0001-" + String(i + 2).padStart(5, "0");
         });
       
-        // 共通LINEリンク
-        const lineUrl = "https://lin.ee/MwRdDOk";
+        // リンク先のベースURL（共通）
+        const baseUrl = "https://ideaofficial.link-lc.com/adoptin/1/";
       
-        // すべてのLINEリンク要素を取得して上書き（codeが該当すれば）
-        if (validCodes.includes(code)) {
-          document.querySelectorAll("a.everline_link").forEach(link => {
-            link.href = lineUrl;
-          });
-        } else {
-          // codeが不正 or なし → デフォルト動作（そのままか何もしない）
-          // ここでリンクを無効にしたい場合は以下を有効化：
-          // document.querySelectorAll("a.everline_link").forEach(link => link.href = "#");
-        }
+        document.querySelectorAll("a.everline_link").forEach(link => {
+          if (validCodes.includes(adCode)) {
+            // 分岐対象ならリンクURLを書き換え
+            link.href = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&euid=${encodeURIComponent(euid)}`;
+          } else {
+            // 該当しないAD_CODEはリンク無効化（任意）
+            link.href = "#";
+            link.style.pointerEvents = "none";
+            link.style.opacity = "0.5";
+          }
+        });
       </script>
 </body>
 </html> 
