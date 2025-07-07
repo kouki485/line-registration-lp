@@ -30,5 +30,28 @@
     
     <script src="script.js"></script>
     <script type='text/javascript' src='https:/ideaofficial.link-Ic.com/adoptin/js/1/Access.js's'></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get("code");
+      
+        // 対象の広告コード一覧（001-00001 〜 001-00020）
+        const validCodes = Array.from({length: 20}, (_, i) => {
+          return "001-" + String(i + 1).padStart(5, '0');
+        });
+      
+        // 共通LINEリンク
+        const lineUrl = "https://lin.ee/MwRdDOk";
+      
+        // すべてのLINEリンク要素を取得して上書き（codeが該当すれば）
+        if (validCodes.includes(code)) {
+          document.querySelectorAll("a.everline_link").forEach(link => {
+            link.href = lineUrl;
+          });
+        } else {
+          // codeが不正 or なし → デフォルト動作（そのままか何もしない）
+          // ここでリンクを無効にしたい場合は以下を有効化：
+          // document.querySelectorAll("a.everline_link").forEach(link => link.href = "#");
+        }
+      </script>
 </body>
 </html> 
