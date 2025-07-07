@@ -1,38 +1,22 @@
-// LINE登録ボタンがクリックされたときの処理
-function registerLine() {
-    // LINE友だち追加URL
-    const lineUrl = 'https://lin.ee/MwRdDOk';
-    
-    // クリック時のアニメーション効果
-    const clickedButton = event.target.closest('.line-button');
-    if (clickedButton) {
-        clickedButton.style.transform = 'translateX(-50%) scale(0.9)';
-        setTimeout(() => {
-            clickedButton.style.transform = 'translateX(-50%) scale(1)';
-        }, 150);
-    }
-    
-    // 直接LINEに遷移
-    window.open(lineUrl, '_blank');
-    
-    // Google Analyticsなどのトラッキングイベントを送信する場合
-    // gtag('event', 'click', {
-    //     'event_category': 'LINE',
-    //     'event_label': 'registration_button'
-    // });
-}
-
-// ページ読み込み時の処理
+// PAGE読み込み時の処理
 document.addEventListener('DOMContentLoaded', function() {
-    // すべてのLINE登録ボタンにイベントリスナーを追加
+    // LINE登録ボタンにアクセシビリティを追加
     const lineButtons = document.querySelectorAll('.line-button');
     
     lineButtons.forEach((button, index) => {
+        // クリック時のアニメーション効果のみ追加
         button.addEventListener('click', function(e) {
-            e.preventDefault();
+            // アニメーション効果
+            const clickedButton = e.target.closest('.line-button');
+            if (clickedButton) {
+                clickedButton.style.transform = 'translateX(-50%) scale(0.9)';
+                setTimeout(() => {
+                    clickedButton.style.transform = 'translateX(-50%) scale(1)';
+                }, 150);
+            }
             
-            // 実際のLINE登録処理を実行
-            registerLine();
+            // HTMLの<a>タグの処理を優先（preventDefault()は削除）
+            // elink経由でのリンクはHTMLで処理される
         });
         
         // ボタンにキーボードアクセシビリティを追加
