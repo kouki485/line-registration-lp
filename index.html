@@ -13,17 +13,17 @@
         
         <!-- クリック可能なLINE登録ボタンエリア -->
         <!-- 1つ目のLINE登録ボタン（上部） -->
-        <a href="https://lin.ee/MwRdDOk" class="everline_link" target="_blank" rel="noopener noreferrer">
+        <a href="https://ideaofficial.link-lc.com/adoptin/1/?elinktag=3viiRysL" class="everline_link" target="_blank" rel="noopener noreferrer">
             <img src="line-button.png" alt="LINE登録ボタン" class="line-button line-button-1">
         </a>
         
         <!-- 2つ目のLINE登録ボタン（中部） -->
-        <a href="https://lin.ee/MwRdDOk" class="everline_link" target="_blank" rel="noopener noreferrer">
+        <a href="https://ideaofficial.link-lc.com/adoptin/1/?elinktag=3viiRysL" class="everline_link" target="_blank" rel="noopener noreferrer">
             <img src="line-button.png" alt="LINE登録ボタン" class="line-button line-button-2">
         </a>
         
         <!-- 3つ目のLINE登録ボタン（下部1） -->
-        <a href="https://lin.ee/MwRdDOk" class="everline_link" target="_blank" rel="noopener noreferrer">
+        <a href="https://ideaofficial.link-lc.com/adoptin/1/?elinktag=3viiRysL" class="everline_link" target="_blank" rel="noopener noreferrer">
             <img src="line-button.png" alt="LINE登録ボタン" class="line-button line-button-3">
         </a>
     </div>
@@ -31,29 +31,45 @@
     <script src="script.js"></script>
     <script type='text/javascript' src='https://ideaofficial.link-lc.com/adoptin/js/1/access.js'></script>
     <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔍 elink計測スクリプト開始');
+        
         const params = new URLSearchParams(window.location.search);
         const adCode = params.get("AD_CODE") || "";
+        console.log('📊 AD_CODE:', adCode);
         
         // 分岐対象のAD_CODE一覧（0001-00001 ～ 0001-00066）
         const validCodes = Array.from({ length: 66 }, (_, i) => {
           return "0001-" + String(i + 1).padStart(5, "0");
         });
+        console.log('✅ 有効なAD_CODE範囲:', validCodes[0], '〜', validCodes[validCodes.length - 1]);
       
         // elinkの基本URL（BOT番号1を使用）
         const baseUrl = "https://ideaofficial.link-lc.com/adoptin/1/";
         
         // elink管理画面で取得したelinktagの値
         const elinkTag = "3viiRysL";
+        console.log('🏷️  elinktag:', elinkTag);
       
-        document.querySelectorAll("a.everline_link").forEach(link => {
+        const links = document.querySelectorAll("a.everline_link");
+        console.log('🔗 見つかったリンク数:', links.length);
+        
+        links.forEach((link, index) => {
+          let newUrl;
           if (validCodes.includes(adCode)) {
             // elinkで計測可能なURL形式（完全版）
-            link.href = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(elinkTag)}`;
+            newUrl = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(elinkTag)}`;
+            console.log(`✅ リンク${index + 1}: AD_CODE有効 → ${newUrl}`);
           } else {
             // AD_CODEが無効な場合はelinktagのみ
-            link.href = `${baseUrl}?elinktag=${encodeURIComponent(elinkTag)}`;
+            newUrl = `${baseUrl}?elinktag=${encodeURIComponent(elinkTag)}`;
+            console.log(`⚠️  リンク${index + 1}: AD_CODE無効 → ${newUrl}`);
           }
+          link.href = newUrl;
         });
+        
+        console.log('🎯 elink計測スクリプト完了');
+      });
       </script>
 </body>
 </html> 
