@@ -34,9 +34,9 @@
         const params = new URLSearchParams(window.location.search);
         const code = params.get("code");
       
-        // 対象の広告コード一覧（001-00001 〜 001-00020）
+        // 対象の広告コード一覧（001-00002 〜 001-00021）
         const validCodes = Array.from({length: 20}, (_, i) => {
-          return "001-" + String(i + 1).padStart(5, '0');
+          return "0001-" + String(i + 2).padStart(5, '0');
         });
       
         // 共通LINEリンク
