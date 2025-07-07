@@ -34,9 +34,9 @@
         const params = new URLSearchParams(window.location.search);
         const adCode = params.get("AD_CODE") || "";
         
-        // 分岐対象のAD_CODE一覧（0001-00047 ～ 0001-00066）
-        const validCodes = Array.from({ length: 20 }, (_, i) => {
-          return "0001-" + String(i + 47).padStart(5, "0");
+        // 分岐対象のAD_CODE一覧（0001-00001 ～ 0001-00066）
+        const validCodes = Array.from({ length: 66 }, (_, i) => {
+          return "0001-" + String(i + 1).padStart(5, "0");
         });
       
         // elinkの基本URL（BOT番号1を使用）
