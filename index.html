@@ -29,12 +29,12 @@
     </div>
     
     <script src="script.js"></script>
-    <script type='text/javascript' src='https:/ideaofficial.link-Ic.com/adoptin/js/1/Access.js's'></script>
+    <script type='text/javascript' src='https:/ideaofficial.link-Ic.com/adoptin/js/1/Access.js'></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const code = params.get("code");
       
-        // 対象の広告コード一覧（001-00002 〜 001-00021）
+        // 対象の広告コード一覧（001-00001 〜 001-00020）
         const validCodes = Array.from({length: 20}, (_, i) => {
           return "0001-" + String(i + 2).padStart(5, '0');
         });
