@@ -47,18 +47,13 @@
         console.log('🔍 elink計測スクリプト開始');
         
         const params = new URLSearchParams(window.location.search);
-        const adCode = params.get("AD_CODE");      // 例: 0001_00002
-        const elinktag = params.get("elinktag");   // 例: 3viiRysL
         const euid = params.get("euid");           // euidパラメータ
         const uid = params.get("uid");             // uidパラメータ
         
-        console.log('📊 AD_CODE:', adCode);
-        console.log('🏷️ elinktag:', elinktag);
         console.log('🆔 euid:', euid);
         console.log('🆔 uid:', uid);
     
         const baseUrl = "https://ideaofficial.link-lc.com/adoptin/1/";
-        const defaultElinkTag = "3viiRysL";
         
         // URLにパラメータを追加する共通関数
         function buildUrlWithParams(baseUrl, params) {
@@ -70,13 +65,6 @@
           });
           return url.toString();
         }
-    
-        // ✅ アンダースコア形式で生成
-        const validCodes = Array.from({ length: 66 }, (_, i) => {
-          return "0001_" + String(i + 1).padStart(5, "0");
-        });
-        
-        console.log('✅ 有効なAD_CODE範囲:', validCodes[0], '〜', validCodes[validCodes.length - 1]);
     
         const links = document.querySelectorAll("a.everline_link");
         console.log('🔗 見つかったリンク数:', links.length);
@@ -104,8 +92,6 @@
                 // 1. クリック計測情報をLocalStorageに保存
                 const clickData = {
                   timestamp: Date.now(),
-                  adCode: adCode,
-                  elinktag: elinktag,
                   euid: euid,
                   uid: uid,
                   url: url,
@@ -117,7 +103,7 @@
                 console.log('📊 クリック情報をlocalStorageに保存');
                 
                 // 2. 軽量なクリック計測ピクセルのみ送信
-                sendClickPixel(adCode, elinktag, euid, uid);
+                sendClickPixel(euid, uid);
                 
                 console.log('✅ クリック計測完了（登録完了計測は実際の登録後に実行）');
                 
@@ -127,64 +113,25 @@
             });
           }
           
-          if (adCode && elinktag) {
-            const finalUrl = buildUrlWithParams(baseUrl, {
-              AD_CODE: adCode,
-              elinktag: elinktag,
-              euid: euid || '###uid###'  // 既存のeuidがあればそれを使用、なければデフォルト
-            });
-            console.log('✅ 両パラメータ有効 → ', finalUrl);
-            links.forEach(link => {
-              link.href = finalUrl;
-              link.style.pointerEvents = "auto";
-              link.style.opacity = "1";
-              setupClickTracking(link, finalUrl);
-            });
-          } else if (adCode && validCodes.includes(adCode)) {
-            const finalUrl = buildUrlWithParams(baseUrl, {
-              AD_CODE: adCode,
-              elinktag: defaultElinkTag,
-              euid: euid || '###uid###'  // 既存のeuidがあればそれを使用、なければデフォルト
-            });
-            console.log('✅ AD_CODE有効・elinktag未指定 → ', finalUrl);
-            links.forEach(link => {
-              link.href = finalUrl;
-              link.style.pointerEvents = "auto";
-              link.style.opacity = "1";
-              setupClickTracking(link, finalUrl);
-            });
-          } else if (elinktag) {
-            const finalUrl = buildUrlWithParams(baseUrl, {
-              elinktag: elinktag,
-              euid: euid || '###uid###'  // 既存のeuidがあればそれを使用、なければデフォルト
-            });
-            console.log('✅ elinktag有効・AD_CODE未指定 → ', finalUrl);
-            links.forEach(link => {
-              link.href = finalUrl;
-              link.style.pointerEvents = "auto";
-              link.style.opacity = "1";
-              setupClickTracking(link, finalUrl);
-            });
-          } else {
-            // パラメータ不足時もeuidパラメータを付与
-            console.log('⚠️ パラメータ不足 - デフォルト設定でリンク構築');
-            const finalUrl = buildUrlWithParams(baseUrl, {
-              elinktag: defaultElinkTag,
-              euid: euid || '###uid###'  // 既存のeuidがあればそれを使用、なければデフォルト
-            });
-            links.forEach(link => {
-              link.href = finalUrl;
-              link.style.pointerEvents = "auto";
-              link.style.opacity = "1";
-              setupClickTracking(link, finalUrl);
-            });
-          }
+          // uid/euidパラメータでURL構築
+          const finalUrl = buildUrlWithParams(baseUrl, {
+            euid: euid || '###uid###',  // 既存のeuidがあればそれを使用、なければデフォルト
+            uid: uid
+          });
+          console.log('✅ URL構築完了 → ', finalUrl);
+          
+          links.forEach(link => {
+            link.href = finalUrl;
+            link.style.pointerEvents = "auto";
+            link.style.opacity = "1";
+            setupClickTracking(link, finalUrl);
+          });
           
           console.log('🎯 elink計測スクリプト完了');
         });
         
         // 軽量なクリック計測ピクセル送信関数
-        function sendClickPixel(adCode, elinktag, euid, uid) {
+        function sendClickPixel(euid, uid) {
           const pixelImg = document.createElement('img');
           pixelImg.style.display = 'none';
           pixelImg.style.width = '1px';
@@ -193,8 +140,6 @@
           let trackingUrl = 'https://ideaofficial.link-lc.com/adoptin/1/click.gif?';
           const params = new URLSearchParams();
           
-          if (adCode) params.append('AD_CODE', adCode);
-          if (elinktag) params.append('elinktag', elinktag);
           if (euid) params.append('euid', euid);
           if (uid) params.append('uid', uid);
           params.append('event', 'click');
