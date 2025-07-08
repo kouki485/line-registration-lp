@@ -49,15 +49,13 @@
         const params = new URLSearchParams(window.location.search);
         const adCode = params.get("AD_CODE");      // 例: 0001_00002
         const elinktag = params.get("elinktag");   // 例: 3viiRysL
-        const ccid = params.get("ccid");           // ccidパラメータ
-        const coid = params.get("coid");           // coidパラメータ
-        const csid = params.get("csid");           // csidパラメータ
+        const euid = params.get("euid");           // euidパラメータ
+        const uid = params.get("uid");             // uidパラメータ
         
         console.log('📊 AD_CODE:', adCode);
         console.log('🏷️ elinktag:', elinktag);
-        console.log('🆔 ccid:', ccid);
-        console.log('🆔 coid:', coid);
-        console.log('🆔 csid:', csid);
+        console.log('🆔 euid:', euid);
+        console.log('🆔 uid:', uid);
     
         const baseUrl = "https://ideaofficial.link-lc.com/adoptin/1/";
         const defaultElinkTag = "3viiRysL";
@@ -108,9 +106,8 @@
                   timestamp: Date.now(),
                   adCode: adCode,
                   elinktag: elinktag,
-                  ccid: ccid,
-                  coid: coid,
-                  csid: csid,
+                  euid: euid,
+                  uid: uid,
                   url: url,
                   userAgent: navigator.userAgent,
                   isMobile: isMobile,
@@ -120,7 +117,7 @@
                 console.log('📊 クリック情報をlocalStorageに保存');
                 
                 // 2. 軽量なクリック計測ピクセルのみ送信
-                sendClickPixel(adCode, elinktag, ccid, coid, csid);
+                sendClickPixel(adCode, elinktag, euid, uid);
                 
                 console.log('✅ クリック計測完了（登録完了計測は実際の登録後に実行）');
                 
@@ -134,10 +131,7 @@
             const finalUrl = buildUrlWithParams(baseUrl, {
               AD_CODE: adCode,
               elinktag: elinktag,
-              ccid: ccid,
-              coid: coid,
-              csid: csid,
-              euid: '###uid###'
+              euid: euid || '###uid###'  // 既存のeuidがあればそれを使用、なければデフォルト
             });
             console.log('✅ 両パラメータ有効 → ', finalUrl);
             links.forEach(link => {
@@ -150,10 +144,7 @@
             const finalUrl = buildUrlWithParams(baseUrl, {
               AD_CODE: adCode,
               elinktag: defaultElinkTag,
-              ccid: ccid,
-              coid: coid,
-              csid: csid,
-              euid: '###uid###'
+              euid: euid || '###uid###'  // 既存のeuidがあればそれを使用、なければデフォルト
             });
             console.log('✅ AD_CODE有効・elinktag未指定 → ', finalUrl);
             links.forEach(link => {
@@ -165,10 +156,7 @@
           } else if (elinktag) {
             const finalUrl = buildUrlWithParams(baseUrl, {
               elinktag: elinktag,
-              ccid: ccid,
-              coid: coid,
-              csid: csid,
-              euid: '###uid###'
+              euid: euid || '###uid###'  // 既存のeuidがあればそれを使用、なければデフォルト
             });
             console.log('✅ elinktag有効・AD_CODE未指定 → ', finalUrl);
             links.forEach(link => {
@@ -182,10 +170,7 @@
             console.log('⚠️ パラメータ不足 - デフォルト設定でリンク構築');
             const finalUrl = buildUrlWithParams(baseUrl, {
               elinktag: defaultElinkTag,
-              ccid: ccid,
-              coid: coid,
-              csid: csid,
-              euid: '###uid###'
+              euid: euid || '###uid###'  // 既存のeuidがあればそれを使用、なければデフォルト
             });
             links.forEach(link => {
               link.href = finalUrl;
@@ -199,7 +184,7 @@
         });
         
         // 軽量なクリック計測ピクセル送信関数
-        function sendClickPixel(adCode, elinktag, ccid, coid, csid) {
+        function sendClickPixel(adCode, elinktag, euid, uid) {
           const pixelImg = document.createElement('img');
           pixelImg.style.display = 'none';
           pixelImg.style.width = '1px';
@@ -210,9 +195,8 @@
           
           if (adCode) params.append('AD_CODE', adCode);
           if (elinktag) params.append('elinktag', elinktag);
-          if (ccid) params.append('ccid', ccid);
-          if (coid) params.append('coid', coid);
-          if (csid) params.append('csid', csid);
+          if (euid) params.append('euid', euid);
+          if (uid) params.append('uid', uid);
           params.append('event', 'click');
           params.append('_t', Date.now().toString());
           
