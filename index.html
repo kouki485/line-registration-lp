@@ -40,28 +40,28 @@
         const defaultElinkTag = "3viiRysL";
     
         // ✅ アンダースコア形式で生成
-        const validCodes = Array.from({ length: 661 }, (, i) => {
+        const validCodes = Array.from({ length: 661 }, (_, i) => {
           return "0001_" + String(i + 1).padStart(5, "0");
         });
     
         const links = document.querySelectorAll("a.everline_link");
     
         if (adCode && elinktag) {
-          const finalUrl = ${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(elinktag)};
+          const finalUrl = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(elinktag)}`;
           links.forEach(link => {
             link.href = finalUrl;
             link.style.pointerEvents = "auto";
             link.style.opacity = "1";
           });
         } else if (adCode && validCodes.includes(adCode)) {
-          const finalUrl = ${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(defaultElinkTag)};
+          const finalUrl = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(defaultElinkTag)}`;
           links.forEach(link => {
             link.href = finalUrl;
             link.style.pointerEvents = "auto";
             link.style.opacity = "1";
           });
         } else if (elinktag) {
-          const finalUrl = ${baseUrl}?elinktag=${encodeURIComponent(elinktag)};
+          const finalUrl = `${baseUrl}?elinktag=${encodeURIComponent(elinktag)}`;
           links.forEach(link => {
             link.href = finalUrl;
             link.style.pointerEvents = "auto";
