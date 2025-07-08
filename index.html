@@ -33,6 +33,8 @@
     <!-- elink計測スクリプトを先に読み込み -->
     <!-- CV計測用スクリプト（友だち登録後の誘導LP用） -->
     <script type='text/javascript' src='https://ideaofficial.link-lc.com/js/everline_cvset.js'></script>
+    <!-- 登録完了計測用スクリプト -->
+    <script type='text/javascript' src='https://ideaofficial.link-lc.com/js/everline_cvget.js'></script>
     <script>
       // elink計測スクリプトの初期化完了を待つ
       function waitForElink(callback) {
@@ -61,10 +63,12 @@
         const euid = params.get("euid");           // euidパラメータ
         const uid = params.get("uid");             // uidパラメータ
         const elinktag = params.get("elinktag");   // elinktagパラメータ
+        const adCode = params.get("AD_CODE");      // 広告コード（登録者数計測に必須）
         
         console.log('🆔 euid:', euid);
         console.log('🆔 uid:', uid);
         console.log('🏷️ elinktag:', elinktag);
+        console.log('📊 AD_CODE:', adCode);
     
         const baseUrl = "https://ideaofficial.link-lc.com/adoptin/1/";
         
@@ -105,6 +109,7 @@
                 // 1. クリック計測情報をLocalStorageに保存
                 const clickData = {
                   timestamp: Date.now(),
+                  adCode: adCode,
                   elinktag: elinktag,
                   euid: euid,
                   uid: uid,
@@ -117,7 +122,7 @@
                 console.log('📊 クリック情報をlocalStorageに保存');
                 
                 // 2. 軽量なクリック計測ピクセルのみ送信
-                sendClickPixel(elinktag, euid, uid);
+                sendClickPixel(adCode, elinktag, euid, uid);
                 
                 console.log('✅ クリック計測完了（登録完了計測は実際の登録後に実行）');
                 
@@ -127,8 +132,16 @@
             });
           }
           
-          // uid/euid/elinktagパラメータでURL構築
+          // uid/euid/elinktag/AD_CODEパラメータでURL構築
           const urlParams = {};
+          
+          // AD_CODEパラメータの処理（登録者数計測に必須）
+          if (adCode) {
+            urlParams.AD_CODE = adCode;
+            console.log('✅ AD_CODEパラメータを使用:', adCode);
+          } else {
+            console.log('⚠️ AD_CODEパラメータなし（登録者数計測に影響する可能性）');
+          }
           
           // elinktagパラメータの処理
           if (elinktag) {
@@ -170,7 +183,7 @@
         });
         
         // 軽量なクリック計測ピクセル送信関数
-        function sendClickPixel(elinktag, euid, uid) {
+        function sendClickPixel(adCode, elinktag, euid, uid) {
           const pixelImg = document.createElement('img');
           pixelImg.style.display = 'none';
           pixelImg.style.width = '1px';
@@ -179,6 +192,7 @@
           let trackingUrl = 'https://ideaofficial.link-lc.com/adoptin/1/click.gif?';
           const params = new URLSearchParams();
           
+          if (adCode) params.append('AD_CODE', adCode);
           if (elinktag) params.append('elinktag', elinktag);
           if (euid) params.append('euid', euid);
           if (uid) params.append('uid', uid);
