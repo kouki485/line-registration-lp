@@ -74,7 +74,7 @@
           const currentBotId = checkBotId();
           console.log('🤖 使用中のBOT ID:', currentBotId);
           
-          // リンククリック時の追加計測を設定する関数
+          // リンククリック時の軽量な計測を設定する関数
           function setupClickTracking(link, url) {
             link.addEventListener('click', function(e) {
               console.log('🔥 リンククリック検出:', url);
@@ -84,35 +84,25 @@
               const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
               console.log('📱 モバイル環境:', isMobile ? 'Yes' : 'No');
               
-              // 登録完了計測を事前に送信（複数の方法で確実に）
+              // クリック計測のみ実行（登録完了計測は実行しない）
               try {
-                // 1. elink公式計測API
-                if (typeof window.elink !== 'undefined' && window.elink.conversion) {
-                  console.log('📊 事前登録完了計測を送信（elink）');
-                  window.elink.conversion();
-                } else if (typeof window.adoptin !== 'undefined' && window.adoptin.conversion) {
-                  console.log('📊 事前登録完了計測を送信（adoptin）');
-                  window.adoptin.conversion();
-                } else {
-                  console.log('⚠️ elink計測APIが見つかりません - 代替手段で計測');
-                }
-                
-                // 2. カスタム計測ピクセルの送信
-                sendConversionPixel(adCode, elinktag);
-                
-                // 3. 追加の計測確認（即座に送信）
-                sendImmediateConversion(adCode, elinktag);
-                
-                // 4. LocalStorageに計測情報を保存（フォールバック）
-                const trackingData = {
+                // 1. クリック計測情報をLocalStorageに保存
+                const clickData = {
                   timestamp: Date.now(),
                   adCode: adCode,
                   elinktag: elinktag,
                   url: url,
-                  userAgent: navigator.userAgent
+                  userAgent: navigator.userAgent,
+                  isMobile: isMobile,
+                  event: 'click'
                 };
-                localStorage.setItem('elink_conversion_' + Date.now(), JSON.stringify(trackingData));
-                console.log('💾 計測データをlocalStorageに保存');
+                localStorage.setItem('elink_click_' + Date.now(), JSON.stringify(clickData));
+                console.log('📊 クリック情報をlocalStorageに保存');
+                
+                // 2. 軽量なクリック計測ピクセルのみ送信
+                sendClickPixel(adCode, elinktag);
+                
+                console.log('✅ クリック計測完了（登録完了計測は実際の登録後に実行）');
                 
               } catch (error) {
                 console.error('❌ クリック時計測エラー:', error);
@@ -162,24 +152,25 @@
           console.log('🎯 elink計測スクリプト完了');
         });
         
-        // 登録完了計測ピクセル送信関数
-        function sendConversionPixel(adCode, elinktag) {
+        // 軽量なクリック計測ピクセル送信関数
+        function sendClickPixel(adCode, elinktag) {
           const pixelImg = document.createElement('img');
           pixelImg.style.display = 'none';
           pixelImg.style.width = '1px';
           pixelImg.style.height = '1px';
           
-          let trackingUrl = 'https://ideaofficial.link-lc.com/adoptin/1/conversion.gif?';
+          let trackingUrl = 'https://ideaofficial.link-lc.com/adoptin/1/click.gif?';
           const params = new URLSearchParams();
           
           if (adCode) params.append('AD_CODE', adCode);
           if (elinktag) params.append('elinktag', elinktag);
+          params.append('event', 'click');
           params.append('_t', Date.now().toString());
           
           pixelImg.src = trackingUrl + params.toString();
           document.body.appendChild(pixelImg);
           
-          console.log('📊 登録完了計測ピクセル送信:', pixelImg.src);
+          console.log('📊 クリック計測ピクセル送信:', pixelImg.src);
           
           // 3秒後に削除
           setTimeout(() => {
@@ -187,42 +178,6 @@
               pixelImg.parentNode.removeChild(pixelImg);
             }
           }, 3000);
-        }
-        
-        // 即座に計測を送信する関数
-        function sendImmediateConversion(adCode, elinktag) {
-          // 複数の計測エンドポイントに同時送信
-          const endpoints = [
-            'https://ideaofficial.link-lc.com/adoptin/1/conversion.gif',
-            'https://ideaofficial.link-lc.com/adoptin/1/track.gif',
-            'https://ideaofficial.link-lc.com/adoptin/1/register.gif'
-          ];
-          
-          endpoints.forEach((endpoint, index) => {
-            const img = document.createElement('img');
-            img.style.display = 'none';
-            img.style.width = '1px';
-            img.style.height = '1px';
-            
-            const params = new URLSearchParams();
-            if (adCode) params.append('AD_CODE', adCode);
-            if (elinktag) params.append('elinktag', elinktag);
-            params.append('event', 'conversion');
-            params.append('_t', Date.now().toString());
-            params.append('_i', index.toString());
-            
-            img.src = endpoint + '?' + params.toString();
-            document.body.appendChild(img);
-            
-            console.log(`📊 即座計測送信 ${index + 1}/3:`, img.src);
-            
-            // 5秒後に削除
-            setTimeout(() => {
-              if (img.parentNode) {
-                img.parentNode.removeChild(img);
-              }
-            }, 5000);
-          });
         }
         
         // BOT ID確認関数
