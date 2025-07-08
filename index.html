@@ -13,17 +13,17 @@
       
       <!-- クリック可能なLINE登録ボタンエリア -->
       <!-- 1つ目のLINE登録ボタン（上部） -->
-      <a href="https://ideaofficial.link-lc.com/adoptin/1/?elinktag=3viiRysL" class="everline_link" target="_blank" rel="noopener noreferrer">
+      <a href="https://ideaofficial.link-lc.com/adoptin/1/" class="everline_link" target="_blank" rel="noopener noreferrer">
         <img src="line-button.png" alt="LINE登録ボタン" class="line-button line-button-1">
       </a>
       
       <!-- 2つ目のLINE登録ボタン（中部） -->
-      <a href="https://ideaofficial.link-lc.com/adoptin/1/?elinktag=3viiRysL" class="everline_link" target="_blank" rel="noopener noreferrer">
+      <a href="https://ideaofficial.link-lc.com/adoptin/1/" class="everline_link" target="_blank" rel="noopener noreferrer">
         <img src="line-button.png" alt="LINE登録ボタン" class="line-button line-button-2">
       </a>
       
       <!-- 3つ目のLINE登録ボタン（下部1） -->
-      <a href="https://ideaofficial.link-lc.com/adoptin/1/?elinktag=3viiRysL" class="everline_link" target="_blank" rel="noopener noreferrer">
+      <a href="https://ideaofficial.link-lc.com/adoptin/1/" class="everline_link" target="_blank" rel="noopener noreferrer">
         <img src="line-button.png" alt="LINE登録ボタン" class="line-button line-button-3">
       </a>
     </div>
@@ -46,12 +46,25 @@
       document.addEventListener('DOMContentLoaded', function () {
         console.log('🔍 elink計測スクリプト開始');
         
+        // 現在のURLを確認
+        console.log('🌐 現在のURL:', window.location.href);
+        console.log('🔗 URLパラメータ部分:', window.location.search);
+        
         const params = new URLSearchParams(window.location.search);
+        
+        // 全てのパラメータを確認
+        console.log('📋 全てのURLパラメータ:');
+        for (let [key, value] of params) {
+          console.log(`  ${key}: ${value}`);
+        }
+        
         const euid = params.get("euid");           // euidパラメータ
         const uid = params.get("uid");             // uidパラメータ
+        const elinktag = params.get("elinktag");   // elinktagパラメータ
         
         console.log('🆔 euid:', euid);
         console.log('🆔 uid:', uid);
+        console.log('🏷️ elinktag:', elinktag);
     
         const baseUrl = "https://ideaofficial.link-lc.com/adoptin/1/";
         
@@ -92,6 +105,7 @@
                 // 1. クリック計測情報をLocalStorageに保存
                 const clickData = {
                   timestamp: Date.now(),
+                  elinktag: elinktag,
                   euid: euid,
                   uid: uid,
                   url: url,
@@ -103,7 +117,7 @@
                 console.log('📊 クリック情報をlocalStorageに保存');
                 
                 // 2. 軽量なクリック計測ピクセルのみ送信
-                sendClickPixel(euid, uid);
+                sendClickPixel(elinktag, euid, uid);
                 
                 console.log('✅ クリック計測完了（登録完了計測は実際の登録後に実行）');
                 
@@ -113,12 +127,37 @@
             });
           }
           
-          // uid/euidパラメータでURL構築
-          const finalUrl = buildUrlWithParams(baseUrl, {
-            euid: euid || '###uid###',  // 既存のeuidがあればそれを使用、なければデフォルト
-            uid: uid
-          });
-          console.log('✅ URL構築完了 → ', finalUrl);
+          // uid/euid/elinktagパラメータでURL構築
+          const urlParams = {};
+          
+          // elinktagパラメータの処理
+          if (elinktag) {
+            urlParams.elinktag = elinktag;
+            console.log('✅ elinktagパラメータを使用:', elinktag);
+          } else {
+            urlParams.elinktag = '3viiRysL';  // デフォルト値
+            console.log('⚠️ elinktagデフォルト値を使用: 3viiRysL');
+          }
+          
+          // euidパラメータの処理
+          if (euid) {
+            urlParams.euid = euid;
+            console.log('✅ euidパラメータを使用:', euid);
+          } else {
+            urlParams.euid = '###uid###';
+            console.log('⚠️ euidデフォルト値を使用: ###uid###');
+          }
+          
+          // uidパラメータの処理
+          if (uid) {
+            urlParams.uid = uid;
+            console.log('✅ uidパラメータを使用:', uid);
+          } else {
+            console.log('⚠️ uidパラメータなし');
+          }
+          
+          const finalUrl = buildUrlWithParams(baseUrl, urlParams);
+          console.log('✅ 最終URL構築完了 → ', finalUrl);
           
           links.forEach(link => {
             link.href = finalUrl;
@@ -131,7 +170,7 @@
         });
         
         // 軽量なクリック計測ピクセル送信関数
-        function sendClickPixel(euid, uid) {
+        function sendClickPixel(elinktag, euid, uid) {
           const pixelImg = document.createElement('img');
           pixelImg.style.display = 'none';
           pixelImg.style.width = '1px';
@@ -140,6 +179,7 @@
           let trackingUrl = 'https://ideaofficial.link-lc.com/adoptin/1/click.gif?';
           const params = new URLSearchParams();
           
+          if (elinktag) params.append('elinktag', elinktag);
           if (euid) params.append('euid', euid);
           if (uid) params.append('uid', uid);
           params.append('event', 'click');
