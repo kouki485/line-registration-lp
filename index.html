@@ -35,38 +35,58 @@
         console.log('🔍 elink計測スクリプト開始');
         
         const params = new URLSearchParams(window.location.search);
-        const adCode = params.get("AD_CODE") || "";
+        const adCode = params.get("AD_CODE");      // 例: 0001_00002
+        const elinktag = params.get("elinktag");   // 例: 3viiRysL
+        
         console.log('📊 AD_CODE:', adCode);
+        console.log('🏷️  elinktag:', elinktag);
+        
+        // elinkの基本URL（BOT番号1を使用）
+        const baseUrl = "https://ideaofficial.link-lc.com/adoptin/1/";
+        
+        // デフォルトのelinktagの値（パラメータがない場合のフォールバック）
+        const defaultElinkTag = "3viiRysL";
         
         // 分岐対象のAD_CODE一覧（0001-00001 ～ 0001-00066）
         const validCodes = Array.from({ length: 66 }, (_, i) => {
           return "0001-" + String(i + 1).padStart(5, "0");
         });
         console.log('✅ 有効なAD_CODE範囲:', validCodes[0], '〜', validCodes[validCodes.length - 1]);
-      
-        // elinkの基本URL（BOT番号1を使用）
-        const baseUrl = "https://ideaofficial.link-lc.com/adoptin/1/";
         
-        // elink管理画面で取得したelinktagの値
-        const elinkTag = "3viiRysL";
-        console.log('🏷️  elinktag:', elinkTag);
-      
         const links = document.querySelectorAll("a.everline_link");
         console.log('🔗 見つかったリンク数:', links.length);
         
-        links.forEach((link, index) => {
-          let newUrl;
-          if (validCodes.includes(adCode)) {
-            // elinkで計測可能なURL形式（完全版）
-            newUrl = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(elinkTag)}`;
-            console.log(`✅ リンク${index + 1}: AD_CODE有効 → ${newUrl}`);
-          } else {
-            // AD_CODEが無効な場合はelinktagのみ
-            newUrl = `${baseUrl}?elinktag=${encodeURIComponent(elinkTag)}`;
-            console.log(`⚠️  リンク${index + 1}: AD_CODE無効 → ${newUrl}`);
-          }
-          link.href = newUrl;
-        });
+        // 最終的に組み立てるURL（AD_CODE + elinktag）
+        if (adCode && elinktag) {
+          // 両方のパラメータが存在する場合
+          const finalUrl = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(elinktag)}`;
+          console.log('✅ 両パラメータ有効 → ', finalUrl);
+          links.forEach(link => {
+            link.href = finalUrl;
+          });
+        } else if (adCode && validCodes.includes(adCode)) {
+          // AD_CODEのみ有効でelinktagが未指定の場合（デフォルトを使用）
+          const finalUrl = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(defaultElinkTag)}`;
+          console.log('✅ AD_CODE有効・elinktag未指定 → ', finalUrl);
+          links.forEach(link => {
+            link.href = finalUrl;
+          });
+        } else if (elinktag) {
+          // elinktagのみ有効でAD_CODEが未指定の場合
+          const finalUrl = `${baseUrl}?elinktag=${encodeURIComponent(elinktag)}`;
+          console.log('✅ elinktag有効・AD_CODE未指定 → ', finalUrl);
+          links.forEach(link => {
+            link.href = finalUrl;
+          });
+        } else {
+          // パラメータが足りないときはボタンを無効化
+          console.log('⚠️  必要なパラメータが不足 - リンクを無効化');
+          links.forEach(link => {
+            link.href = "#";
+            link.style.pointerEvents = "none";
+            link.style.opacity = "0.5";
+          });
+        }
         
         console.log('🎯 elink計測スクリプト完了');
       });
