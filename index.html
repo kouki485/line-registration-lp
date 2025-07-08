@@ -31,6 +31,8 @@
     <script src="script.js"></script>
     <!-- elink計測スクリプトを先に読み込み -->
     <script type='text/javascript' src='https://ideaofficial.link-lc.com/adoptin/js/1/access.js'></script>
+    <!-- CV計測用スクリプト（友だち登録後の誘導LP用） -->
+    <script type='text/javascript' src='https://ideaofficial.link-lc.com/js/everline_cvset.js'></script>
     <script>
       // elink計測スクリプトの初期化完了を待つ
       function waitForElink(callback) {
@@ -68,25 +70,50 @@
         waitForElink(() => {
           console.log('✅ elink計測スクリプト初期化完了');
           
+          // BOT IDを確認
+          const currentBotId = checkBotId();
+          console.log('🤖 使用中のBOT ID:', currentBotId);
+          
           // リンククリック時の追加計測を設定する関数
           function setupClickTracking(link, url) {
             link.addEventListener('click', function(e) {
               console.log('🔥 リンククリック検出:', url);
+              console.log('📱 デバイス情報:', navigator.userAgent);
               
-              // 登録完了計測を事前に送信
+              // モバイル環境チェック
+              const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+              console.log('📱 モバイル環境:', isMobile ? 'Yes' : 'No');
+              
+              // 登録完了計測を事前に送信（複数の方法で確実に）
               try {
+                // 1. elink公式計測API
                 if (typeof window.elink !== 'undefined' && window.elink.conversion) {
                   console.log('📊 事前登録完了計測を送信（elink）');
                   window.elink.conversion();
                 } else if (typeof window.adoptin !== 'undefined' && window.adoptin.conversion) {
                   console.log('📊 事前登録完了計測を送信（adoptin）');
                   window.adoptin.conversion();
+                } else {
+                  console.log('⚠️ elink計測APIが見つかりません - 代替手段で計測');
                 }
                 
-                // カスタム計測ピクセルの送信
-                if (adCode || elinktag) {
-                  sendConversionPixel(adCode, elinktag);
-                }
+                // 2. カスタム計測ピクセルの送信
+                sendConversionPixel(adCode, elinktag);
+                
+                // 3. 追加の計測確認（即座に送信）
+                sendImmediateConversion(adCode, elinktag);
+                
+                // 4. LocalStorageに計測情報を保存（フォールバック）
+                const trackingData = {
+                  timestamp: Date.now(),
+                  adCode: adCode,
+                  elinktag: elinktag,
+                  url: url,
+                  userAgent: navigator.userAgent
+                };
+                localStorage.setItem('elink_conversion_' + Date.now(), JSON.stringify(trackingData));
+                console.log('💾 計測データをlocalStorageに保存');
+                
               } catch (error) {
                 console.error('❌ クリック時計測エラー:', error);
               }
@@ -94,7 +121,7 @@
           }
           
           if (adCode && elinktag) {
-            const finalUrl = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(elinktag)}`;
+            const finalUrl = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(elinktag)}&euid=###uid###`;
             console.log('✅ 両パラメータ有効 → ', finalUrl);
             links.forEach(link => {
               link.href = finalUrl;
@@ -103,7 +130,7 @@
               setupClickTracking(link, finalUrl);
             });
           } else if (adCode && validCodes.includes(adCode)) {
-            const finalUrl = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(defaultElinkTag)}`;
+            const finalUrl = `${baseUrl}?AD_CODE=${encodeURIComponent(adCode)}&elinktag=${encodeURIComponent(defaultElinkTag)}&euid=###uid###`;
             console.log('✅ AD_CODE有効・elinktag未指定 → ', finalUrl);
             links.forEach(link => {
               link.href = finalUrl;
@@ -112,7 +139,7 @@
               setupClickTracking(link, finalUrl);
             });
           } else if (elinktag) {
-            const finalUrl = `${baseUrl}?elinktag=${encodeURIComponent(elinktag)}`;
+            const finalUrl = `${baseUrl}?elinktag=${encodeURIComponent(elinktag)}&euid=###uid###`;
             console.log('✅ elinktag有効・AD_CODE未指定 → ', finalUrl);
             links.forEach(link => {
               link.href = finalUrl;
@@ -121,12 +148,14 @@
               setupClickTracking(link, finalUrl);
             });
           } else {
-            // パラメータ不足
-            console.log('⚠️ 必要なパラメータが不足 - リンクを無効化');
+            // パラメータ不足時もeuidパラメータを付与
+            console.log('⚠️ パラメータ不足 - デフォルト設定でリンク構築');
+            const finalUrl = `${baseUrl}?elinktag=${encodeURIComponent(defaultElinkTag)}&euid=###uid###`;
             links.forEach(link => {
-              link.href = "#";
-              link.style.pointerEvents = "none";
-              link.style.opacity = "0.5";
+              link.href = finalUrl;
+              link.style.pointerEvents = "auto";
+              link.style.opacity = "1";
+              setupClickTracking(link, finalUrl);
             });
           }
           
@@ -158,6 +187,59 @@
               pixelImg.parentNode.removeChild(pixelImg);
             }
           }, 3000);
+        }
+        
+        // 即座に計測を送信する関数
+        function sendImmediateConversion(adCode, elinktag) {
+          // 複数の計測エンドポイントに同時送信
+          const endpoints = [
+            'https://ideaofficial.link-lc.com/adoptin/1/conversion.gif',
+            'https://ideaofficial.link-lc.com/adoptin/1/track.gif',
+            'https://ideaofficial.link-lc.com/adoptin/1/register.gif'
+          ];
+          
+          endpoints.forEach((endpoint, index) => {
+            const img = document.createElement('img');
+            img.style.display = 'none';
+            img.style.width = '1px';
+            img.style.height = '1px';
+            
+            const params = new URLSearchParams();
+            if (adCode) params.append('AD_CODE', adCode);
+            if (elinktag) params.append('elinktag', elinktag);
+            params.append('event', 'conversion');
+            params.append('_t', Date.now().toString());
+            params.append('_i', index.toString());
+            
+            img.src = endpoint + '?' + params.toString();
+            document.body.appendChild(img);
+            
+            console.log(`📊 即座計測送信 ${index + 1}/3:`, img.src);
+            
+            // 5秒後に削除
+            setTimeout(() => {
+              if (img.parentNode) {
+                img.parentNode.removeChild(img);
+              }
+            }, 5000);
+          });
+        }
+        
+        // BOT ID確認関数
+        function checkBotId() {
+          // 現在のスクリプトソースからBOT IDを確認
+          const scripts = document.querySelectorAll('script[src*="ideaofficial.link-lc.com/adoptin/js/"]');
+          let botId = '1'; // デフォルト値
+          
+          scripts.forEach(script => {
+            const match = script.src.match(/\/adoptin\/js\/(\d+)\/access\.js/);
+            if (match) {
+              botId = match[1];
+            }
+          });
+          
+          console.log('🤖 検出されたBOT ID:', botId);
+          return botId;
         }
       });
     </script>
